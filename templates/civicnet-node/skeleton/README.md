@@ -45,15 +45,20 @@ To refresh vendored source from upstream:
 git -C civicnet fetch origin && git -C civicnet reset --hard origin/master
 ```
 
-## Deploy (Docker Compose)
+## Deploy (systemd)
+
+The node runs as a **systemd unit** wrapping `docker run`. The host config
+`civicnet.conf` is **mounted read-only** into the container at
+`/root/.civicnet/civicnet.conf`.
 
 ```bash
-cp .env.example .env && nano .env         # ports, tags
-docker compose up -d
+sudo cp deploy-civicnet.service /etc/systemd/system/civicnet.service
+sudo cp civicnet.conf.example /root/.civicnet/civicnet.conf
+sudo nano /root/.civicnet/civicnet.conf      # set rpcpassword
+sudo systemctl enable --now civicnet
 ```
 
-State lives in `./data/` (blockchain) and `./logs/` on the host. The node
-serves:
+State in a docker volume `<name>-data`. Ports:
 
 | Port  | Purpose        |
 |-------|----------------|

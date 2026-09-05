@@ -13,7 +13,8 @@ applies local patches, builds a Docker image, and deploys with Docker Compose
 - `Dockerfile` — builds the node binaries (${{ values.binaryName }})
 - `build.sh` — builds `${{ values.imageRepo }}:<local-sha>` from the local tree
 - `patch.sh` — vendors the upstream source + applies `patches/`
-- `docker-compose.yml` — deploys the node with persistent data/logs
+- `docker-compose.yml` — (deprecated; node deploys via systemd unit below)
+- `deploy-${{ values.componentId }}.service` — systemd unit wrapping `docker run`
 
 ## Build
 
@@ -37,14 +38,20 @@ cd ..
 ./build.sh
 ```
 
-## Deploy (Docker Compose)
+## Deploy (systemd)
+
+The node runs as a **systemd unit** that wraps `docker run`. The host config
+file `${{ values.coinName | lower }}.conf` is **mounted read-only** into the
+container at `/root/.${{ values.coinName | lower }}/${{ values.coinName | lower }}.conf`.
 
 ```bash
-cp .env.example .env && nano .env
-docker compose up -d
+sudo cp deploy-${{ values.componentId }}.service /etc/systemd/system/${{ values.componentId }}.service
+sudo cp ${{ values.coinName | lower }}.conf.example /root/.${{ values.coinName | lower }}/${{ values.coinName | lower }}.conf
+sudo nano /root/.${{ values.coinName | lower }}/${{ values.coinName | lower }}.conf   # set rpcpassword
+sudo systemctl enable --now ${{ values.componentId }}
 ```
 
-State in `./data/`, logs in `./logs/`. Ports:
+State in a docker volume `${{ values.componentId }}-data`. Ports:
 
 | Port | Purpose |
 |------|---------|
