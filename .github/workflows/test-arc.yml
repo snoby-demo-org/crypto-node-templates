@@ -1,0 +1,17 @@
+name: Test ARC Runner
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test-runner:
+    runs-on: self-hosted
+    steps:
+      - name: Show runner info
+        run: |
+          echo "Running on: $(hostname)"
+          echo "Runner OS: $(uname -a)"
+          echo "In kubernetes: $([ -d /var/run/secrets/kubernetes.io ] && echo yes || echo no)"
+      - name: Docker check
+        run: |
+          docker version --format '{{.Server.Version}}' || echo "docker not available"
