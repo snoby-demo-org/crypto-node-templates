@@ -1,0 +1,37 @@
+name: Template CI (runs on k8s self-hosted runner)
+
+on:
+  push:
+    paths:
+      - 'templates/**'
+      - 'catalog-info.yaml'
+  pull_request:
+    paths:
+      - 'templates/**'
+      - 'catalog-info.yaml'
+  workflow_dispatch:
+
+# That this workflow runs at all proves the ARC k8s-runner works:
+#   - runs-on: k8s-runner  (the ARC scale set name / label in homelab-k3s)
+#   - dind mode gives it a working docker daemon
+jobs:
+  validate:
+    runs-on: k8s-runner
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate templates are well-formed YAML
+        run: |
+          set -e
+          # Use python in the runner container (or yamllint if present)
+          for f in $(find templates -name 'template.yaml'); do
+            ruby -ryaml -e "YAML.load_file('$f'); puts 'OK: $f'"
+          done
+          ruby -ryaml -e "YAML.load_file('catalog-info.yaml'); puts 'OK: catalog-info.yaml'"
+
+      - name: Report runner environment
+        run: |
+          echo "hostname: $(hostname)"
+          echo "running in kubernetes: $([ -d /var/run/secrets/kubernetes.io ] && echo yes || echo no)"
+          echo "docker daemon: $(docker version --format '{{.Server.Version}}' 2>/dev/null || echo unavailable)"
