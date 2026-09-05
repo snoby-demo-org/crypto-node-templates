@@ -105,6 +105,11 @@ spec:
           type: string
           description: Docker image tag (default = local source commit SHA)
           default: latest
+        runnerLabel:
+          title: GitHub runner label
+          type: string
+          description: 'ARC self-hosted runner scale-set label this repo builds on (repo-scoped runner for this repo)'
+          default: k8s-runner
 
   steps:
     - id: fetchBase
@@ -125,6 +130,7 @@ spec:
           containerized: ${{ parameters.containerized }}
           imageRepo: ${{ parameters.imageRepo }}
           imageTag: ${{ parameters.imageTag }}
+          runnerLabel: ${{ parameters.runnerLabel }}
 
     - id: publish
       name: Publish
