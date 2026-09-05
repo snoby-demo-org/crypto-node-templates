@@ -156,8 +156,6 @@ spec:
       name: Publish
       action: publish:github
       input:
-        allowedHosts:
-          - github.com
         description: This is ${{ parameters.componentId }}
         repoUrl: ${{ parameters.repoUrl }}
         defaultBranch: 'main'
