@@ -5,7 +5,7 @@ on:
 
 jobs:
   test-runner:
-    runs-on: self-hosted
+    runs-on: k8s-runner
     steps:
       - name: Show runner info
         run: |
