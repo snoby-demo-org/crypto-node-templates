@@ -1,0 +1,18 @@
+services:
+  civicnetd:
+    image: civicnet/civicnetd:latest
+    container_name: ${{ values.componentId }}
+    restart: unless-stopped
+    command: civicnetd -conf=/root/.civicnet/civicnet.conf -datadir=/root/.civicnet
+    ports:
+      - "${{ values.p2pPort }}:${{ values.p2pPort }}/tcp"
+      - "${{ values.rpcPort }}:${{ values.rpcPort }}/tcp"
+    volumes:
+      - civicnet-data:/root/.civicnet
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+
+volumes:
+  civicnet-data:

@@ -1,0 +1,8 @@
+apiVersion: backstage.io/v1alpha1
+kind: Location
+metadata:
+  name: crypto-node-templates
+  description: Catalog location for crypto node software templates
+spec:
+  targets:
+    - ./templates/civicnet-node/template.yaml

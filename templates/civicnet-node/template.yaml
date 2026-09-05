@@ -1,0 +1,143 @@
+apiVersion: scaffolder.backstage.io/v1beta3
+kind: Template
+metadata:
+  name: civicnet-node
+  title: CivicNet Node
+  description: Scaffold a CivicNet (CIVIC) node — civicnetd daemon with config, systemd unit, Docker, healthcheck, and README.
+  tags:
+    - crypto
+    - node
+    - civicnet
+    - civicnetd
+spec:
+  owner: snoby
+  type: service
+
+  parameters:
+    - title: Node Details
+      required:
+        - componentId
+        - description
+      properties:
+        componentId:
+          title: Name
+          type: string
+          description: Unique name for the node component
+          ui:autofocus: true
+          ui:options:
+            rows: 5
+        description:
+          title: Description
+          type: string
+          description: Description of the node
+        owner:
+          title: Owner
+          type: string
+          description: Owner of the component
+          ui:field: OwnerPicker
+          ui:options:
+            catalogFilter:
+              kind: Group
+        system:
+          title: System
+          type: string
+          description: System the node belongs to
+          ui:field: EntityPicker
+          ui:options:
+            catalogFilter:
+              kind: System
+            defaultKind: System
+
+    - title: Repository
+      required:
+        - repoUrl
+      properties:
+        repoUrl:
+          title: Repository Location
+          type: string
+          ui:field: RepoUrlPicker
+          ui:options:
+            allowedHosts:
+              - github.com
+
+    - title: Node Configuration
+      required:
+        - rpcUser
+        - rpcPort
+        - p2pPort
+      properties:
+        rpcUser:
+          title: RPC Username
+          type: string
+          description: Username for the JSON-RPC interface
+          default: civicnet
+        rpcPassword:
+          title: RPC Password
+          type: string
+          description: Password for the JSON-RPC interface
+          ui:field: Secret
+        rpcPort:
+          title: RPC Port
+          type: integer
+          description: TCP port for JSON-RPC
+          default: 9332
+          minimum: 1024
+          maximum: 65535
+        p2pPort:
+          title: P2P Port
+          type: integer
+          description: TCP port for peer-to-peer networking
+          default: 9333
+          minimum: 1024
+          maximum: 65535
+        containerized:
+          title: Containerized deployment
+          type: boolean
+          description: Enable Docker container support
+          default: true
+
+  steps:
+    - id: fetchBase
+      name: Fetch Base
+      action: fetch:template
+      input:
+        url: ./skeleton
+        copyWithoutTemplating:
+          - '**/*.conf'
+        values:
+          componentId: ${{ parameters.componentId }}
+          description: ${{ parameters.description }}
+          owner: ${{ parameters.owner }}
+          system: ${{ parameters.system }}
+          repoUrl: ${{ parameters.repoUrl }}
+          rpcUser: ${{ parameters.rpcUser }}
+          rpcPassword: ${{ secrets.rpcPassword }}
+          rpcPort: ${{ parameters.rpcPort }}
+          p2pPort: ${{ parameters.p2pPort }}
+          containerized: ${{ parameters.containerized }}
+
+    - id: publish
+      name: Publish
+      action: publish:github
+      input:
+        allowedHosts:
+          - github.com
+        description: This is ${{ parameters.componentId }}
+        repoUrl: ${{ parameters.repoUrl }}
+        defaultBranch: 'main'
+        repoVisibility: private
+
+    - id: register
+      name: Register
+      action: catalog:register
+      input:
+        repoContentsUrl: ${{ steps.publish.output.repoContentsUrl }}
+        catalogInfoPath: '/catalog-info.yaml'
+
+  output:
+    links:
+      - title: Repository
+        url: ${{ steps.publish.output.remoteUrl }}
+      - title: Open in catalog
+        icon: catalog
+        entityRef: ${{ steps.register.output.entityRef }}

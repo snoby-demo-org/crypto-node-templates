@@ -1,0 +1,16 @@
+---
+# This file is used to register this component in Backstage.
+# The whole file is a templated asset; the fields below are filled in when
+# this repo is created from the CivicNet Node template.
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: ${{ values.componentId }}
+  description: ${{ values.description }}
+  annotations:
+    github.com/project-slug: ${{ values.repoUrl | replace("github.com/", "") }}
+spec:
+  type: service
+  lifecycle: experimental
+  owner: ${{ values.owner | default("group:default/guests") }}
+  system: ${{ values.system }}

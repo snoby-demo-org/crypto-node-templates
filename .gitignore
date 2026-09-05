@@ -1,0 +1,4 @@
+# Ignore generated node artifacts if templates are executed locally
+node_modules/
+*.log
+.DS_Store
