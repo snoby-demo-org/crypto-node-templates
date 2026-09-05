@@ -24,11 +24,12 @@ jobs:
       - name: Validate templates are well-formed YAML
         run: |
           set -e
-          pip install -q pyyaml 2>/dev/null || pip3 install -q pyyaml 2>/dev/null || true
+          # ARC runner image is minimal (no python/ruby) — install a parser.
+          (command -v python3 >/dev/null && pip install -q pyyaml) \
+            || (command -v apt-get >/dev/null && sudo apt-get update -qq && sudo apt-get install -y -qq python3-pip >/dev/null && pip install -q pyyaml) \
+            || echo "WARN: no package manager for YAML parser"
           for f in $(find templates -name 'template.yaml') catalog-info.yaml; do
-            python3 -c "import yaml; yaml.safe_load(open('$f')); print('OK: $f')" 2>/dev/null \
-              || ruby -ryaml -e "YAML.load_file('$f'); puts 'OK: $f'" 2>/dev/null \
-              || { echo "ERROR: cannot parse $f"; exit 1; }
+            python3 -c "import yaml; yaml.safe_load(open('$f')); print('OK: $f')" || { echo "ERROR: cannot parse $f"; exit 1; }
           done
 
       - name: Report runner environment
