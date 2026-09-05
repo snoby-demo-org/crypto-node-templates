@@ -40,9 +40,12 @@ cd ..
 
 ## Deploy (systemd)
 
-The node runs as a **systemd unit** that wraps `docker run`. The host config
-file `${{ values.coinName | lower }}.conf` is **mounted read-only** into the
-container at `/root/.${{ values.coinName | lower }}/${{ values.coinName | lower }}.conf`.
+The node runs as a **systemd unit** wrapping `docker run`. No node flags are
+passed on the command line — the daemon **picks up its config automatically**
+from the datadir. The host config `${{ values.coinName | lower }}.conf` is
+**mounted read-only** into the container at
+`/root/.${{ values.coinName | lower }}/${{ values.coinName | lower }}.conf`,
+so the daemon's default datadir lookup finds it.
 
 ```bash
 sudo cp deploy-${{ values.componentId }}.service /etc/systemd/system/${{ values.componentId }}.service

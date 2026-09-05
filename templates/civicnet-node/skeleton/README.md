@@ -47,9 +47,11 @@ git -C civicnet fetch origin && git -C civicnet reset --hard origin/master
 
 ## Deploy (systemd)
 
-The node runs as a **systemd unit** wrapping `docker run`. The host config
-`civicnet.conf` is **mounted read-only** into the container at
-`/root/.civicnet/civicnet.conf`.
+The node runs as a **systemd unit** wrapping `docker run`. No node flags are
+passed on the command line — the daemon **picks up its config automatically**
+from the datadir. The host config `civicnet.conf` is **mounted read-only** into
+the container at `/root/.civicnet/civicnet.conf`, so the daemon's default
+datadir lookup finds it.
 
 ```bash
 sudo cp deploy-civicnet.service /etc/systemd/system/civicnet.service
