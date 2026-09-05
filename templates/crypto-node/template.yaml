@@ -1,0 +1,179 @@
+apiVersion: scaffolder.backstage.io/v1beta3
+kind: Template
+metadata:
+  name: crypto-node
+  title: Crypto Node
+  description: Scaffold a crypto (PoW/PoS) full-node repo — vendored source + patches + Dockerfile + build.sh + docker-compose (RPC/P2P/ZMQ). Parameterized for any coin; push to a fresh private GitHub repo.
+  tags:
+    - crypto
+    - node
+    - blockchain
+spec:
+  owner: snoby
+  type: service
+
+  parameters:
+    - title: Node Details
+      required:
+        - componentId
+        - description
+      properties:
+        componentId:
+          title: Name
+          type: string
+          description: Unique name for the node component (e.g. radiant-node, nexa-node)
+          ui:autofocus: true
+          ui:options:
+            rows: 5
+        description:
+          title: Description
+          type: string
+          description: Description of the node
+        owner:
+          title: Owner
+          type: string
+          description: Owner of the component
+          ui:field: OwnerPicker
+          ui:options:
+            catalogFilter:
+              kind: Group
+        system:
+          title: System
+          type: string
+          description: System the node belongs to
+          ui:field: EntityPicker
+          ui:options:
+            catalogFilter:
+              kind: System
+            defaultKind: System
+
+    - title: Repository
+      required:
+        - repoUrl
+      properties:
+        repoUrl:
+          title: Repository Location
+          type: string
+          ui:field: RepoUrlPicker
+          ui:options:
+            allowedHosts:
+              - github.com
+
+    - title: Coin / Upstream
+      required:
+        - coinName
+        - upstreamUrl
+      properties:
+        coinName:
+          title: Coin / network name
+          type: string
+          description: e.g. CivicNet, Radiant, Nexa (used in README, config)
+        upstreamUrl:
+          title: Upstream source repo
+          type: string
+          description: Git URL of the coin's core source (vendored into ./src)
+          default: https://github.com/CivicLight/CivicNet.git
+        sourceDir:
+          title: Vendored source directory
+          type: string
+          description: Directory name the upstream source is vendored into
+          default: src
+        binaryName:
+          title: Node binary name(s)
+          type: string
+          description: Comma-separated binaries built (e.g. radiant-node,radiant-cli)
+          default: civicnet-node,civicnet-cli,civicnet-wallet
+
+    - title: Networking
+      required:
+        - rpcPort
+        - p2pPort
+      properties:
+        rpcPort:
+          title: RPC port
+          type: integer
+          default: 9332
+          minimum: 1024
+          maximum: 65535
+        p2pPort:
+          title: P2P port
+          type: integer
+          default: 9333
+          minimum: 1024
+          maximum: 65535
+        zmqEnabled:
+          title: Enable ZMQ
+          type: boolean
+          description: Enable ZMQ pub-sub (hashblock/hashtx/rawblock/rawtx) for pool feeds
+          default: true
+        rpcUser:
+          title: RPC username
+          type: string
+          default: coin
+        rpcPassword:
+          title: RPC password
+          type: string
+          ui:field: Secret
+
+    - title: Image
+      properties:
+        imageRepo:
+          title: Docker image repository
+          type: string
+          description: Docker image repo (e.g. iotapi322/<coin>)
+          default: iotapi322/crypto-node
+        imageTag:
+          title: Image tag
+          type: string
+          description: Docker image tag (default = local source commit SHA)
+          default: latest
+
+  steps:
+    - id: fetchBase
+      name: Fetch Base
+      action: fetch:template
+      input:
+        url: ./skeleton
+        values:
+          componentId: ${{ parameters.componentId }}
+          description: ${{ parameters.description }}
+          owner: ${{ parameters.owner }}
+          system: ${{ parameters.system }}
+          repoUrl: ${{ parameters.repoUrl }}
+          coinName: ${{ parameters.coinName }}
+          upstreamUrl: ${{ parameters.upstreamUrl }}
+          sourceDir: ${{ parameters.sourceDir }}
+          binaryName: ${{ parameters.binaryName }}
+          rpcPort: ${{ parameters.rpcPort }}
+          p2pPort: ${{ parameters.p2pPort }}
+          zmqEnabled: ${{ parameters.zmqEnabled }}
+          rpcUser: ${{ parameters.rpcUser }}
+          rpcPassword: ${{ secrets.rpcPassword }}
+          imageRepo: ${{ parameters.imageRepo }}
+          imageTag: ${{ parameters.imageTag }}
+
+    - id: publish
+      name: Publish
+      action: publish:github
+      input:
+        allowedHosts:
+          - github.com
+        description: This is ${{ parameters.componentId }}
+        repoUrl: ${{ parameters.repoUrl }}
+        defaultBranch: 'main'
+        repoVisibility: private
+
+    - id: register
+      name: Register
+      action: catalog:register
+      input:
+        repoContentsUrl: ${{ steps.publish.output.repoContentsUrl }}
+        catalogInfoPath: '/catalog-info.yaml'
+
+  output:
+    links:
+      - title: Repository
+        url: ${{ steps.publish.output.remoteUrl }}
+      - title: Open in catalog
+        icon: catalog
+        entityRef: ${{ steps.register.output.entityRef }}

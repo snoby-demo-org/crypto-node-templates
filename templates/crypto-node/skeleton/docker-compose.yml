@@ -1,0 +1,25 @@
+# ${{ values.coinName }} node — Docker Compose deployment
+services:
+  node:
+    image: ${{ values.imageRepo }}:${{ values.imageTag }}
+    container_name: ${{ values.componentId }}
+    restart: unless-stopped
+    ports:
+      - "${{ values.rpcPort }}:${{ values.rpcPort }}/tcp"  # RPC
+      - "${{ values.p2pPort }}:${{ values.p2pPort }}/tcp"  # P2P
+      - "28332:28332/tcp"  # ZMQ hashblock
+      - "28333:28333/tcp"  # ZMQ hashtx
+      - "28334:28334/tcp"  # ZMQ rawblock
+      - "28335:28335/tcp"  # ZMQ rawtx
+    volumes:
+      - ./data/${{ values.coinName | lower }}:/root/.${{ values.coinName | lower }}
+      - ./logs:/var/log/${{ values.coinName | lower }}
+    healthcheck:
+      test: ["CMD", "healthcheck.sh"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
