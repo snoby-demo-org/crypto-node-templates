@@ -3,7 +3,7 @@ kind: Template
 metadata:
   name: civicnet-node
   title: CivicNet Node
-  description: Scaffold a CivicNet (CIVIC) node — civicnetd daemon with config, systemd unit, Docker, healthcheck, and README.
+  description: Scaffold a CivicNet (CIVIC) node repo — vendored source + patches + Dockerfile + build.sh + docker-compose (RPC/P2P/ZMQ), pushed to a fresh private GitHub repo.
   tags:
     - crypto
     - node
@@ -95,6 +95,16 @@ spec:
           type: boolean
           description: Enable Docker container support
           default: true
+        imageRepo:
+          title: Image repository
+          type: string
+          description: Docker image repo for the node
+          default: iotapi322/civicnet
+        imageTag:
+          title: Image tag
+          type: string
+          description: Docker image tag (default = local source commit SHA)
+          default: latest
 
   steps:
     - id: fetchBase
@@ -102,8 +112,6 @@ spec:
       action: fetch:template
       input:
         url: ./skeleton
-        copyWithoutTemplating:
-          - '**/*.conf'
         values:
           componentId: ${{ parameters.componentId }}
           description: ${{ parameters.description }}
@@ -115,6 +123,8 @@ spec:
           rpcPort: ${{ parameters.rpcPort }}
           p2pPort: ${{ parameters.p2pPort }}
           containerized: ${{ parameters.containerized }}
+          imageRepo: ${{ parameters.imageRepo }}
+          imageTag: ${{ parameters.imageTag }}
 
     - id: publish
       name: Publish
