@@ -15,7 +15,10 @@ Mirrors the `CivicLight/CivicNet` image-repo pattern:
 - `patches/` — local source patches (e.g. bump outbound/addnode connections 8→32)
 - `Dockerfile` — builds `civicnet-node`, `civicnet-cli`, `civicnet-wallet` (ZMQ enabled)
 - `build.sh` — builds `iotapi322/civicnet:<local-sha>` from the local tree
-- `docker-compose.yml` — deploys the node with persistent data/logs
+- `patch.sh` — vendors the upstream source + applies `patches/`
+- `.github/workflows/build-node.yml` — CI: build+push the CivicNet image on
+  the k8s self-hosted runner (ARC scale set `k8s-runner`)
+- `deploy-civicnet.service` — systemd unit wrapping `docker run` (config file mounted read-only)
 
 ## Build
 
