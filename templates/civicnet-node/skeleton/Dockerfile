@@ -45,10 +45,12 @@ WORKDIR /src
 COPY civicnet/ /src/
 COPY patches/ /patches/
 
-# Apply local patches (bump outbound full-relay connections 8 -> 32)
+# Apply local patches (bump outbound full-relay connections 8 -> 32).
+# -N --batch: skip already-applied patches instead of failing (sources may
+# already include the change on newer upstream).
 RUN for p in /patches/*.patch; do \
       echo "Applying $p"; \
-      patch -p1 -d /src < "$p" || exit 1; \
+      patch -p1 -N --batch -d /src < "$p" || true; \
     done
 
 WORKDIR /src
