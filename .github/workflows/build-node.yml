@@ -50,5 +50,9 @@ jobs:
         working-directory: node-repo
         run: |
           TAG="${INPUT_TAG:-$(git -C civicnet rev-parse --short HEAD 2>/dev/null || echo local)}"
+          # Push to a registry/image we own (PAT can't push to iotapi322/*).
+          docker tag "iotapi322/civicnet:${TAG}" "ghcr.io/snoby/civicnet:${TAG}" 2>/dev/null || true
           docker login ghcr.io -u snoby -p "${{ secrets.GH_TOKEN }}"
-          docker push "iotapi322/civicnet:$TAG"
+          docker push "ghcr.io/snoby/civicnet:${TAG}"
+        env:
+          INPUT_TAG: ${{ inputs.tag }}
