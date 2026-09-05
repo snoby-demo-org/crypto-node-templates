@@ -24,11 +24,12 @@ jobs:
       - name: Validate templates are well-formed YAML
         run: |
           set -e
-          # Use python in the runner container (or yamllint if present)
-          for f in $(find templates -name 'template.yaml'); do
-            ruby -ryaml -e "YAML.load_file('$f'); puts 'OK: $f'"
+          pip install -q pyyaml 2>/dev/null || pip3 install -q pyyaml 2>/dev/null || true
+          for f in $(find templates -name 'template.yaml') catalog-info.yaml; do
+            python3 -c "import yaml; yaml.safe_load(open('$f')); print('OK: $f')" 2>/dev/null \
+              || ruby -ryaml -e "YAML.load_file('$f'); puts 'OK: $f'" 2>/dev/null \
+              || { echo "ERROR: cannot parse $f"; exit 1; }
           done
-          ruby -ryaml -e "YAML.load_file('catalog-info.yaml'); puts 'OK: catalog-info.yaml'"
 
       - name: Report runner environment
         run: |
