@@ -1,0 +1,54 @@
+name: Build Node Image
+
+on:
+  workflow_dispatch:
+    inputs:
+      node_repo:
+        description: 'Node repo to build (e.g. snoby/test-civicnet-node-1). Defaults to crypto-node-templates.'
+        required: true
+        type: string
+      tag:
+        description: 'Optional upstream tag to vendor+build (e.g. v3.0.8). Leave empty for current vendored source.'
+        required: false
+        default: ''
+        type: string
+
+# Runs on our k8s self-hosted runner (ARC scale set k8s-runner, scoped to this repo).
+jobs:
+  build:
+    runs-on: k8s-runner
+    steps:
+      - name: Checkout this repo (templates)
+        uses: actions/checkout@v4
+
+      - name: Clone node repo
+        run: |
+          git clone "https://x:${GH_TOKEN}@github.com/${{ github.event.inputs.node_repo }}.git" node-repo
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+
+      - name: Vendor upstream + apply patches (if tag requested)
+        working-directory: node-repo
+        run: |
+          ./patch.sh
+          if [ -n "$INPUT_TAG" ]; then
+            git -C "${{ vars.SOURCE_DIR || 'civicnet' }}" checkout "$INPUT_TAG"
+          fi
+        env:
+          INPUT_TAG: ${{ inputs.tag }}
+
+      - name: Build Docker image
+        working-directory: node-repo
+        run: |
+          chmod +x build.sh healthcheck.sh patch.sh 2>/dev/null || true
+          TAG="${INPUT_TAG:-$(git -C civicnet rev-parse --short HEAD 2>/dev/null || echo local)}"
+          TAG="$TAG" IMAGE_REPO="iotapi322/civicnet" ./build.sh
+        env:
+          INPUT_TAG: ${{ inputs.tag }}
+
+      - name: Push image
+        working-directory: node-repo
+        run: |
+          TAG="${INPUT_TAG:-$(git -C civicnet rev-parse --short HEAD 2>/dev/null || echo local)}"
+          docker login ghcr.io -u snoby -p "${{ secrets.GH_TOKEN }}"
+          docker push "iotapi322/civicnet:$TAG"
