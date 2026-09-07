@@ -1,0 +1,17 @@
+---
+# CivicNet system entity. This is the backing System that CivicNet node
+# Components reference via spec.system. Registered here (in the always-present
+# crypto-node-templates catalog location) so the Backstage catalog graph shows
+# a resolved System node with the node components hanging off it.
+apiVersion: backstage.io/v1alpha1
+kind: System
+metadata:
+  name: civicnet-system
+  title: CivicNet Network
+  description: CivicNet (CIVIC) hybrid PoW+PoS blockchain — full nodes, wallets, and pool infrastructure.
+  annotations:
+    backstage.io/techdocs-ref: dir:.
+    github.com/project-slug: snoby/crypto-node-templates
+spec:
+  owner: group:default/guests
+  # domain: default # optional higher grouping
