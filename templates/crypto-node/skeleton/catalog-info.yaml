@@ -6,6 +6,7 @@ metadata:
   description: ${{ values.description }}
   annotations:
     github.com/project-slug: ${{ values.repoUrl | replace("github.com/", "") }}
+    backstage.io/techdocs-ref: dir:.
 spec:
   type: service
   lifecycle: experimental
