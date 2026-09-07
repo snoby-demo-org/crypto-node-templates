@@ -1,47 +1,40 @@
 # ${{ values.componentId }}
 
-${{ values.description }}
+!!! abstract "What this is"
+    ${{ values.description }}
 
-A **CivicNet (CIVIC)** full node. Hybrid PoW+PoS, 60s target, PoS ceiling 30%.
-This repo vendors the upstream CivicNet source, applies local patches, builds a
-Docker image, and deploys via systemd.
+    A **CivicNet (CIVIC)** full node — a hybrid **Proof-of-Work + Proof-of-Stake** blockchain node with a 60-second target block time and a 30% PoS ceiling. This repository vendors the upstream CivicNet source code, applies local patches, builds a Docker image, and deploys it as a systemd unit.
 
-## Repo layout
+<!-- status badges: rendered by the GitHub Actions + GitHub Insights plugins in Backstage -->
 
-| Path | Purpose |
-|------|---------|
-| `src/` | Vendored upstream CivicNet source |
-| `patches/` | Local source patches (applied locally + at image build) |
-| `Dockerfile` | Builds the node binaries |
-| `build.sh` | Builds `${{ values.imageRepo }}:<local-sha>` |
-| `patch.sh` | Vendors upstream + applies `patches/` |
-| `deploy-${{ values.componentId }}.service` | systemd unit wrapping `docker run` |
-| `.github/workflows/build-node.yml` | CI: build + push image |
+## Quick facts
 
-## Networking
+| | |
+|---|---|
+| Network | CivicNet (CIVIC) |
+| Consensus | Hybrid PoW + PoS (60s target, PoS ceiling 30%) |
+| Component | `${{ values.componentId }}` |
+| System | `${{ values.system }}` |
+| Owner | `${{ values.owner }}` |
+| Repository | [`${{ values.repoUrl }}`](${{ values.repoUrl }}) |
+| RPC | port `${{ values.rpcPort }}` |
+| P2P | port `${{ values.p2pPort }}` |
+| Lifecycle | Experimental |
 
-| Port | Purpose |
-|------|---------|
-| ${{ values.rpcPort }} | JSON-RPC |
-| ${{ values.p2pPort }} | P2P |
+## What's in this documentation
 
-## Build
+This documentation is authored as **markdown in the repository** and rendered by
+**Backstage TechDocs**. It is built and published automatically by CI on every
+change to `main` — there is no separate documentation source to maintain.
 
-```bash
-./patch.sh                                          # vendor upstream + apply patches
-cp civicnet.conf.example civicnet.conf
-./build.sh                                          # -> ${{ values.imageRepo }}:<sha>
-```
+- **[Architecture](architecture.md)** — how the node works under the hood
+- **[Deployment runbook](deployment.md)** — from zero to a running node
+- **[Configuration](configuration.md)** — every config option explained
+- **[API & monitoring](api.md)** — RPC endpoints, health checks, metrics
+- **[Troubleshooting](troubleshooting.md)** — how to recover from common issues
 
-## Deploy (systemd)
-
-```bash
-sudo cp deploy-${{ values.componentId }}.service /etc/systemd/system/${{ values.componentId }}.service
-sudo cp civicnet.conf.example /root/.civicnet/civicnet.conf
-sudo nano /root/.civicnet/civicnet.conf   # set rpcpassword
-sudo systemctl enable --now ${{ values.componentId }}
-```
-
-State lives in a docker volume `${{ values.componentId }}-data`. The host config
-is mounted read-only into the container, and the daemon picks it up automatically
-from its default datadir (`~/.civicnet/`) — no node CLI flags are required.
+!!! tip "In Backstage"
+    This entity is registered in the Backstage **software catalog**. Use the
+    **GitHub Actions** tab to see CI status, the **GitHub Insights** tab for repo
+    metrics, and the **graph** view to see how this node relates to its system and
+    API.

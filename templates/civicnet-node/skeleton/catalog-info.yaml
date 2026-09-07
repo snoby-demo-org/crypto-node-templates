@@ -1,7 +1,7 @@
 ---
-# This file is used to register this component in Backstage.
-# The whole file is a templated asset; the fields below are filled in when
-# this repo is created from the CivicNet Node template.
+# This file registers this component in Backstage. The whole file is a templated
+# asset — fields are filled in when this repo is created from the CivicNet Node
+# template.
 apiVersion: backstage.io/v1alpha1
 kind: Component
 metadata:
@@ -10,8 +10,15 @@ metadata:
   annotations:
     github.com/project-slug: ${{ values.repoUrl | replace("github.com/", "") }}
     backstage.io/techdocs-ref: dir:.
+    # Optional, but makes the entity's ownership + lifecycle richer in the UI:
+    # backstage.io/techdocs-entity: ${{ values.componentId }}
+    # github.com/team-slug: my-org/my-team
 spec:
   type: service
   lifecycle: experimental
   owner: ${{ values.owner | default("group:default/guests") }}
   system: ${{ values.system }}
+  # If you register a matching API entity, this links the node to its API in the
+  # catalog graph. The graph view is one of Backstage's showcase features.
+  # providesApis:
+  #   - ${{ values.componentId }}-rpc
