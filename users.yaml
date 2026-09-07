@@ -1,0 +1,15 @@
+---
+# User entity for the homelab's GitHub account. Lets GitHub OAuth sign-in resolve
+# to a catalog user (resolver: usernameMatchingUserEntityName) instead of failing
+# with "unable to resolve user identity". Add one per GitHub user who should sign in.
+apiVersion: backstage.io/v1alpha1
+kind: User
+metadata:
+  name: snoby
+  title: snoby
+  annotations:
+    github.com/user-login: snoby
+spec:
+  profile:
+    displayName: snoby
+  memberOf: [guests]

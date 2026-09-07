@@ -8,3 +8,5 @@ spec:
     - ./templates/civicnet-node/template.yaml
     - ./templates/crypto-node/template.yaml
     - ./system-civicnet.yaml
+    - ./users.yaml
+    - ./group-guests.yaml

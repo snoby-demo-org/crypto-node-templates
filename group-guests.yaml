@@ -1,0 +1,11 @@
+---
+# Default group. Components with owner: group:default/guests and users with
+# memberOf: [guests] resolve against this. Keeps catalog relations clean.
+apiVersion: backstage.io/v1alpha1
+kind: Group
+metadata:
+  name: guests
+  title: Guests
+spec:
+  type: team
+  children: []
