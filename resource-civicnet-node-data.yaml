@@ -1,0 +1,18 @@
+---
+# CivicNet node data resource. Models the on-disk data directory / database that
+# a CivicNet full node maintains (blockchain + wallet datadir). Referenced from a
+# node Component via spec.dependsOn so the catalog graph shows the node's infra
+# dependency too.
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  name: civicnet-node-data
+  title: CivicNet Node Data
+  description: On-disk data directory maintained by a CivicNet full node (blockchain + wallet datadir).
+  annotations:
+    backstage.io/techdocs-ref: dir:.
+    github.com/project-slug: snoby/crypto-node-templates
+spec:
+  type: database
+  owner: group:default/guests
+  system: civicnet-system

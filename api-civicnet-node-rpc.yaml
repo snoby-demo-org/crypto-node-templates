@@ -1,0 +1,64 @@
+---
+# CivicNet node JSON-RPC API entity. This models the interface that a CivicNet
+# full node exposes (Bitcoin-Core style JSON-RPC over HTTP basic auth on :9332).
+# Registered here so the catalog graph shows Component -> Api and the APIs tab
+# has content. Referenced from a node Component via spec.providesApis.
+apiVersion: backstage.io/v1alpha1
+kind: Api
+metadata:
+  name: civicnet-node-rpc
+  title: CivicNet Node JSON-RPC
+  description: JSON-RPC interface exposed by a CivicNet full node (Bitcoin Core style, basic auth on :9332).
+  annotations:
+    backstage.io/techdocs-ref: dir:.
+    github.com/project-slug: snoby/crypto-node-templates
+spec:
+  type: openapi
+  lifecycle: experimental
+  owner: group:default/guests
+  system: civicnet-system
+  definition: |-
+    openapi: 3.0.0
+    info:
+      title: CivicNet Node RPC
+      version: 1.0.0
+      description: JSON-RPC interface for a CivicNet (CIVIC) full node
+    servers:
+      - url: http://127.0.0.1:9332
+        description: Local node RPC endpoint (basic auth)
+    paths:
+      /:
+        post:
+          summary: JSON-RPC method call
+          requestBody:
+            required: true
+            content:
+              application/json:
+                schema:
+                  type: object
+                  required: [jsonrpc, method, id]
+                  properties:
+                    jsonrpc:
+                      type: string
+                      enum: ["1.0"]
+                    method:
+                      type: string
+                      enum: [getblockcount, getnetworkinfo, getstakinginfo]
+                    params:
+                      type: array
+                    id:
+                      type: string
+          responses:
+            "200":
+              description: Successful RPC response
+              content:
+                application/json:
+                  schema:
+                    type: object
+                    properties:
+                      result:
+                        type: object
+                      error:
+                        type: object
+                      id:
+                        type: string

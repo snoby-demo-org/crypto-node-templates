@@ -1,0 +1,16 @@
+---
+# Crypto domain — the top-level grouping that wraps the CivicNet System.
+# Registers under Domain kind, which gives the catalog graph a top level,
+# and lets Systems group under a business area. Referenced by the System
+# via spec.domain (see system-civicnet.yaml).
+apiVersion: backstage.io/v1alpha1
+kind: Domain
+metadata:
+  name: crypto
+  title: Crypto
+  description: Cryptocurrency mining and blockchain infrastructure — nodes, wallets, and pool components.
+  annotations:
+    backstage.io/techdocs-ref: dir:.
+    github.com/project-slug: snoby/crypto-node-templates
+spec:
+  owner: group:default/guests
