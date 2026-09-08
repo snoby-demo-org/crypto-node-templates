@@ -38,13 +38,23 @@ jobs:
       - name: Generate TechDocs
         run: techdocs-cli generate --no-docker --verbose
 
-      - name: Publish TechDocs to MinIO (System entity)
+      - name: Publish TechDocs to MinIO (all entity kinds)
+        # Publish the same docs site under each kind's path so every entity that
+        # uses backstage.io/techdocs-ref: dir:. renders a Docs page.
         run: |
-          techdocs-cli publish \
-            --publisher-type awsS3 \
-            --storage-name techdocs \
-            --entity "default/system/civicnet-system" \
-            --awsBucketRootPath ''
+          for ENTITY in \
+            "default/system/civicnet-system" \
+            "default/domain/crypto" \
+            "default/resource/civicnet-node-data" \
+            "default/api/civicnet-node-rpc"
+          do
+            techdocs-cli publish \
+              --publisher-type awsS3 \
+              --storage-name techdocs \
+              --entity "$ENTITY" \
+              --awsBucketRootPath ''
+            echo "Published $ENTITY"
+          done
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.TECH_DOCS_ACCESS_KEY }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.TECH_DOCS_SECRET_KEY }}
