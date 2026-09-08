@@ -14,4 +14,4 @@ metadata:
     github.com/project-slug: snoby/crypto-node-templates
 spec:
   owner: group:default/guests
-  domain: default
+  domain: crypto

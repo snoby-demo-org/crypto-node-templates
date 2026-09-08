@@ -1,8 +1,9 @@
 ---
 # CivicNet node JSON-RPC API entity. This models the interface that a CivicNet
 # full node exposes (Bitcoin-Core style JSON-RPC over HTTP basic auth on :9332).
-# Registered here so the catalog graph shows Component -> Api and the APIs tab
-# has content. Referenced from a node Component via spec.providesApis.
+# Registered here (in the always-present crypto-node-templates catalog location)
+# so the catalog graph shows Component -> Api and the APIs tab has content.
+# Referenced from a node Component via spec.providesApis.
 apiVersion: backstage.io/v1alpha1
 kind: Api
 metadata:
