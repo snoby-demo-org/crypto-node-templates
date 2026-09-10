@@ -25,9 +25,9 @@ RUN for p in /patches/*.patch; do \
 WORKDIR /src
 RUN ./autogen.sh && \
     ./configure --disable-tests --without-gui --enable-zmq --disable-upnp --prefix=/build && \
-    make -j$(nproc) -C src ${{ values.binaryName }} && \
+    make -j$(nproc) -C src ${{ values.binaryName | replace(",", " ") }} && \
     mkdir -p /build/bin && \
-    cp ${{ values.binaryName }} /build/bin/
+    cp ${{ values.binaryName | replace(",", " ") }} /build/bin/
 
 FROM ubuntu:24.04
 WORKDIR /usr/local/
@@ -38,4 +38,5 @@ VOLUME ["/data", "/root/.${{ values.coinName | lower }}/${{ values.coinName | lo
 
 EXPOSE ${{ values.p2pPort }} ${{ values.rpcPort }} 28332 28333 28334 28335
 
-ENTRYPOINT ["/usr/local/bin/${{ values.binaryName | split(",") | first }}"]
+ENV NODE_BINS="${{ values.binaryName | replace(",", " ") }}"
+ENTRYPOINT ["/bin/sh", "-c", "set -- $NODE_BINS; exec /usr/local/bin/$1 \"$@\"", "sh"]
