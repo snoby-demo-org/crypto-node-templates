@@ -110,6 +110,39 @@ spec:
           type: string
           description: 'ARC self-hosted runner scale-set label this repo builds on (repo-scoped runner for this repo)'
           default: k8s-runner
+        imagePushTarget:
+          title: Image push target
+          type: string
+          description: Where the build workflow pushes the node image
+          enum:
+            - ghcr
+            - dockerhub
+          default: ghcr
+          ui:widget: radio
+
+    - title: CI / Checks
+      description: Select which GitHub Actions workflows get scaffolded into the new repo.
+      properties:
+        checkBuild:
+          title: Build & push node image (build-node.yml)
+          type: boolean
+          default: true
+          description: Manually triggered; vendors upstream + patches, builds, pushes to the push target above.
+        checkCi:
+          title: Validate YAML (ci.yml)
+          type: boolean
+          default: true
+          description: Cheap well-formedness gate on push/PR.
+        checkDagger:
+          title: Dagger lint + PII scan (dagger-checks.yml)
+          type: boolean
+          default: true
+          description: Runs snoby/dagger-checks against the repo on the shared Dagger engine.
+        checkSmoke:
+          title: Smoke test (smoke.yml)
+          type: boolean
+          default: false
+          description: Builds the image and boots the node to confirm RPC/health (requires Secrets configured).
 
   steps:
     - id: fetchBase
@@ -131,6 +164,57 @@ spec:
           imageRepo: ${{ parameters.imageRepo }}
           imageTag: ${{ parameters.imageTag }}
           runnerLabel: ${{ parameters.runnerLabel }}
+          imagePushTarget: ${{ parameters.imagePushTarget }}
+          checkBuild: ${{ parameters.checkBuild }}
+          checkCi: ${{ parameters.checkCi }}
+          checkDagger: ${{ parameters.checkDagger }}
+          checkSmoke: ${{ parameters.checkSmoke }}
+          sourceDir: civicnet
+          coinName: CivicNet
+
+    - id: checkBuild
+      name: Add build workflow
+      if: ${{ parameters.checkBuild }}
+      action: fetch:template
+      input:
+        url: ./checks/build-node
+        values:
+          componentId: ${{ parameters.componentId }}
+          repoUrl: ${{ parameters.repoUrl }}
+          coinName: CivicNet
+          sourceDir: civicnet
+          imageRepo: ${{ parameters.imageRepo }}
+          runnerLabel: ${{ parameters.runnerLabel }}
+          imagePushTarget: ${{ parameters.imagePushTarget }}
+
+    - id: checkCi
+      name: Add CI workflow
+      if: ${{ parameters.checkCi }}
+      action: fetch:template
+      input:
+        url: ./checks/ci
+        values:
+          runnerLabel: ${{ parameters.runnerLabel }}
+
+    - id: checkDagger
+      name: Add Dagger checks workflow
+      if: ${{ parameters.checkDagger }}
+      action: fetch:template
+      input:
+        url: ./checks/dagger-checks
+        values:
+          runnerLabel: ${{ parameters.runnerLabel }}
+
+    - id: checkSmoke
+      name: Add smoke test workflow
+      if: ${{ parameters.checkSmoke }}
+      action: fetch:template
+      input:
+        url: ./checks/smoke
+        values:
+          runnerLabel: ${{ parameters.runnerLabel }}
+          rpcPort: ${{ parameters.rpcPort }}
+          imageRepo: ${{ parameters.imageRepo }}
 
     - id: publish
       name: Publish

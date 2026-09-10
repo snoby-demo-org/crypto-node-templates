@@ -13,10 +13,13 @@ applies local patches, builds a Docker image, and deploys with Docker Compose
 - `Dockerfile` — builds the node binaries (${{ values.binaryName }})
 - `build.sh` — builds `${{ values.imageRepo }}:<local-sha>` from the local tree
 - `patch.sh` — vendors the upstream source + applies `patches/`
-- `.github/workflows/build-node.yml` — CI: build+push the node image on the
-  k8s self-hosted runner (ARC scale set `k8s-runner`). Trigger with
-  "Run workflow", optionally passing an upstream tag to vendor+build.
-- `docker-compose.yml` — (deprecated; node deploys via systemd unit below)
+- `.github/workflows/` — GitHub Actions workflows (selected at scaffold time):
+  - `build-node.yml` — build+push the node image on the k8s self-hosted runner
+    (ARC scale set `${{ values.runnerLabel }}`). Trigger with "Run workflow",
+    optionally passing an upstream tag to vendor+build.
+  - `ci.yml` — validates the repo's YAML parses on push/PR.
+  - `dagger-checks.yml` — lint + PII scan via the shared Dagger engine.
+  - `smoke.yml` — builds the image and boots the node to confirm RPC/health.
 - `deploy-${{ values.componentId }}.service` — systemd unit wrapping `docker run`
 
 ## Build

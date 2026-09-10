@@ -16,8 +16,13 @@ Mirrors the `CivicLight/CivicNet` image-repo pattern:
 - `Dockerfile` — builds `civicnet-node`, `civicnet-cli`, `civicnet-wallet` (ZMQ enabled)
 - `build.sh` — builds `iotapi322/civicnet:<local-sha>` from the local tree
 - `patch.sh` — vendors the upstream source + applies `patches/`
-- `.github/workflows/build-node.yml` — CI: build+push the CivicNet image on
-  the k8s self-hosted runner (ARC scale set `k8s-runner`)
+- `.github/workflows/` — GitHub Actions workflows (selected at scaffold time):
+  - `build-node.yml` — build+push the node image on the k8s self-hosted runner
+    (ARC scale set `${{ values.runnerLabel }}`). Trigger with "Run workflow",
+    optionally passing an upstream tag to vendor+build.
+  - `ci.yml` — validates the repo's YAML parses on push/PR.
+  - `dagger-checks.yml` — lint + PII scan via the shared Dagger engine.
+  - `smoke.yml` — builds the image and boots the node to confirm RPC/health.
 - `deploy-civicnet.service` — systemd unit wrapping `docker run` (config file mounted read-only)
 
 ## Build
