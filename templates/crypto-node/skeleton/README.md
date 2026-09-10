@@ -18,7 +18,8 @@ applies local patches, builds a Docker image, and deploys with Docker Compose
     (ARC scale set `${{ values.runnerLabel }}`). Trigger with "Run workflow",
     optionally passing an upstream tag to vendor+build.
   - `ci.yml` — validates the repo's YAML parses on push/PR.
-  - `dagger-checks.yml` — lint + PII scan via the shared Dagger engine.
+  - `dagger-checks.yml` — lint + PII scan + static-analyzer / private-key /
+    format stubs via the shared Dagger engine.
   - `smoke.yml` — builds the image and boots the node to confirm RPC/health.
 - `deploy-${{ values.componentId }}.service` — systemd unit wrapping `docker run`
 

@@ -21,7 +21,8 @@ Mirrors the `CivicLight/CivicNet` image-repo pattern:
     (ARC scale set `${{ values.runnerLabel }}`). Trigger with "Run workflow",
     optionally passing an upstream tag to vendor+build.
   - `ci.yml` — validates the repo's YAML parses on push/PR.
-  - `dagger-checks.yml` — lint + PII scan via the shared Dagger engine.
+  - `dagger-checks.yml` — lint + PII scan + static-analyzer / private-key /
+    format stubs via the shared Dagger engine.
   - `smoke.yml` — builds the image and boots the node to confirm RPC/health.
 - `deploy-civicnet.service` — systemd unit wrapping `docker run` (config file mounted read-only)
 
