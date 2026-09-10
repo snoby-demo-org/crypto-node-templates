@@ -58,6 +58,8 @@ spec:
           ui:options:
             allowedHosts:
               - github.com
+            allowedOwners:
+              - snoby-demo-org
 
     - title: Coin / Upstream
       required:

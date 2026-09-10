@@ -59,6 +59,8 @@ spec:
           ui:options:
             allowedHosts:
               - github.com
+            allowedOwners:
+              - snoby-demo-org
 
     - title: Node Configuration
       required:
