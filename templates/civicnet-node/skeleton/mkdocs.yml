@@ -2,7 +2,7 @@ site_name: ${{ values.componentId }}
 site_description: ${{ values.description }}
 site_url: http://backstage.viporlab.net
 docs_dir: docs
-repo_url: https://github.com/${{ values.repoUrl | replace("github.com/", "") }}
+repo_url: https://github.com/${{ values.repoUrl | replace("github.com?owner=", "") | replace("&repo=", "/") }}
 edit_uri: edit/main/docs/
 
 theme:

@@ -8,7 +8,7 @@ metadata:
   name: ${{ values.componentId }}
   description: ${{ values.description }}
   annotations:
-    github.com/project-slug: ${{ values.repoUrl | replace("github.com/", "") }}
+    github.com/project-slug: ${{ values.repoUrl | replace("github.com?owner=", "") | replace("&repo=", "/") }}
     backstage.io/techdocs-ref: dir:.
     # Optional, but makes the entity's ownership + lifecycle richer in the UI:
     # backstage.io/techdocs-entity: ${{ values.componentId }}
