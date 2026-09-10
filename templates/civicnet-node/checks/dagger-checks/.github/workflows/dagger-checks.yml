@@ -26,16 +26,16 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Lint (dagger)
-        run: dagger call --mod github.com/snoby/dagger-checks lint --source=.
+        run: dagger call --mod github.com/snoby-demo-org/dagger-checks lint --source=.
 
       - name: PII scan (dagger)
-        run: dagger call --mod github.com/snoby/dagger-checks pii-scan --source=.
+        run: dagger call --mod github.com/snoby-demo-org/dagger-checks pii-scan --source=.
 
       - name: Static analyzer (dagger, stub)
-        run: dagger call --mod github.com/snoby/dagger-checks static-analyzer --source=.
+        run: dagger call --mod github.com/snoby-demo-org/dagger-checks static-analyzer --source=.
 
       - name: Private key check (dagger, stub)
-        run: dagger call --mod github.com/snoby/dagger-checks private-key-check --source=.
+        run: dagger call --mod github.com/snoby-demo-org/dagger-checks private-key-check --source=.
 
       - name: Format check (dagger, stub)
-        run: dagger call --mod github.com/snoby/dagger-checks format --source=.
+        run: dagger call --mod github.com/snoby-demo-org/dagger-checks format --source=.
