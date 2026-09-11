@@ -7,6 +7,7 @@ spec:
   targets:
     - ./templates/civicnet-node/template.yaml
     - ./templates/crypto-node/template.yaml
+    - ./templates/golden-path/template.yaml
     - ./system-civicnet.yaml
     - ./domain-crypto.yaml
     - ./api-civicnet-node-rpc.yaml
