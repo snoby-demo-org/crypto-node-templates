@@ -40,12 +40,13 @@ spec:
         system:
           title: System
           type: string
-          description: Optional system the component belongs to
+          description: System the component belongs to (defaults to goldenpath)
           ui:field: EntityPicker
           ui:options:
             catalogFilter:
               kind: System
             defaultKind: System
+          default: goldenpath
 
     - title: Repository
       required:

@@ -1,0 +1,17 @@
+---
+# Goldenpath system entity. This is the backing System that golden-path
+# onboarded Components land under via spec.system. Registered here (in the
+# always-present goldenpath catalog location) so the catalog graph shows a
+# resolved "goldenpath" System node with onboarded components hanging off it.
+apiVersion: backstage.io/v1alpha1
+kind: System
+metadata:
+  name: goldenpath
+  title: Golden Path
+  description: Projects onboarded via the golden-path template — existing repos brought into the catalog with CI + TechDocs + registration.
+  annotations:
+    backstage.io/techdocs-ref: dir:.
+    github.com/project-slug: snoby-demo-org/goldenpath
+spec:
+  owner: group:default/guests
+  domain: crypto

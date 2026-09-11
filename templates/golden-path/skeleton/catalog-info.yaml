@@ -11,4 +11,4 @@ spec:
   type: service
   lifecycle: production
   owner: ${{ values.owner | default("group:default/guests") }}
-  system: ${{ values.system }}
+  system: ${{ values.system | default("goldenpath") }}
