@@ -1,0 +1,39 @@
+name: Build
+
+# Golden-path CI: compile the project and run its self-test on the self-hosted
+# ARC runner. This is the foundation that makes the GitHub Actions tab in
+# Backstage show real runs.
+
+on:
+  push:
+    branches:
+      - ${{ values.targetBranch }}
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ${{ values.runnerLabel }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install build deps
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq build-essential libssl-dev libgmp-dev \
+            libcurl4-openssl-dev libjansson-dev automake autoconf libtool pkg-config
+
+      - name: Autoreconf / autogen
+        run: |
+          if [ -x ./autogen.sh ]; then ./autogen.sh; else autoreconf -fiv; fi
+
+      - name: Configure
+        run: ./configure --with-crypto --with-curl
+
+      - name: Build
+        run: make -j"$(nproc)"
+
+      - name: Self-test
+        run: |
+          if [ -x ./cpuminer ]; then ./cpuminer --cputest; fi

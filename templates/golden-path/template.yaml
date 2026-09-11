@@ -1,0 +1,177 @@
+apiVersion: scaffolder.backstage.io/v1beta3
+kind: Template
+metadata:
+  name: golden-path
+  title: Golden Path
+  description: Onboard an EXISTING project repo with Backstage's golden path — lays down build.yml (CI on your self-hosted ARC runner) + optional docs/TechDocs + registers the component. Opens a PR; you review and merge.
+  tags:
+    - golden-path
+    - onboarding
+    - ci
+    - github-actions
+spec:
+  owner: snoby
+  type: service
+
+  parameters:
+    - title: Component
+      required:
+        - componentId
+        - description
+        - repoUrl
+      properties:
+        componentId:
+          title: Component name
+          type: string
+          description: Unique catalog name for the component (lowercase, e.g. cpuminer-opt-cpupower)
+          ui:autofocus: true
+        description:
+          title: Description
+          type: string
+          description: One-line description shown in the catalog
+        owner:
+          title: Owner
+          type: string
+          description: Catalog owner (group or user)
+          ui:field: OwnerPicker
+          ui:options:
+            catalogFilter:
+              kind: Group
+        system:
+          title: System
+          type: string
+          description: Optional system the component belongs to
+          ui:field: EntityPicker
+          ui:options:
+            catalogFilter:
+              kind: System
+            defaultKind: System
+
+    - title: Repository
+      required:
+        - repoUrl
+      properties:
+        repoUrl:
+          title: Existing repository
+          type: string
+          description: >-
+            The EXISTING repo to onboard. Golden path does NOT create it — it
+            opens a PR adding CI/docs/catalog-info onto the repo you already own.
+          ui:field: RepoUrlPicker
+          ui:options:
+            allowedHosts:
+              - github.com
+            allowedOwners:
+              - snoby
+              - snoby-demo-org
+        targetBranch:
+          title: Target branch
+          type: string
+          description: Branch the golden-path PR targets (defaults to the repo default branch)
+          default: main
+
+    - title: CI / Docs
+      properties:
+        runnerLabel:
+          title: GitHub runner label
+          type: string
+          description: ARC self-hosted runner scale-set label this repo builds on
+          default: k8s-runner
+        checkBuild:
+          title: Add build.yml (build + self-test on self-hosted runner)
+          type: boolean
+          default: true
+        checkDocs:
+          title: Add docs/ + techdocs.yml (TechDocs to MinIO)
+          type: boolean
+          default: true
+        checkCi:
+          title: Add ci.yml (YAML validate gate)
+          type: boolean
+          default: true
+
+  steps:
+    - id: fetchBase
+      name: Fetch golden-path skeleton
+      action: fetch:template
+      input:
+        url: ./skeleton
+        values:
+          componentId: ${{ parameters.componentId }}
+          description: ${{ parameters.description }}
+          owner: ${{ parameters.owner }}
+          system: ${{ parameters.system }}
+          repoUrl: ${{ parameters.repoUrl }}
+          targetBranch: ${{ parameters.targetBranch }}
+          runnerLabel: ${{ parameters.runnerLabel }}
+          checkBuild: ${{ parameters.checkBuild }}
+          checkDocs: ${{ parameters.checkDocs }}
+          checkCi: ${{ parameters.checkCi }}
+
+    - id: addBuild
+      name: Add build workflow
+      if: ${{ parameters.checkBuild }}
+      action: fetch:template
+      input:
+        url: ./checks/build
+        values:
+          runnerLabel: ${{ parameters.runnerLabel }}
+          componentId: ${{ parameters.componentId }}
+          targetBranch: ${{ parameters.targetBranch }}
+
+    - id: addCi
+      name: Add CI workflow
+      if: ${{ parameters.checkCi }}
+      action: fetch:template
+      input:
+        url: ./checks/ci
+        values:
+          runnerLabel: ${{ parameters.runnerLabel }}
+          targetBranch: ${{ parameters.targetBranch }}
+
+    - id: addDocs
+      name: Add docs + TechDocs workflow
+      if: ${{ parameters.checkDocs }}
+      action: fetch:template
+      input:
+        url: ./checks/docs
+        values:
+          runnerLabel: ${{ parameters.runnerLabel }}
+          componentId: ${{ parameters.componentId }}
+          description: ${{ parameters.description }}
+          targetBranch: ${{ parameters.targetBranch }}
+
+    - id: openPr
+      name: Open golden-path PR
+      action: publish:github:pull-request
+      input:
+        repoUrl: ${{ parameters.repoUrl }}
+        branchName: backstage-golden-path
+        targetBranchName: ${{ parameters.targetBranch }}
+        title: '[Backstage] Golden path: add CI, docs, and catalog registration'
+        description: |
+          This PR (opened by the Backstage golden-path scaffolder) adds to this
+          existing repo the standard Backstage onboarding layers:
+
+          - `.github/workflows/build.yml` — build + self-test on the self-hosted ARC runner.
+          - `.github/workflows/ci.yml` — cheap YAML/gate check.
+          - `.github/workflows/techdocs.yml` — publish docs to MinIO for Backstage TechDocs (if docs enabled).
+          - `docs/` + `mkdocs.yml` — runbook-style documentation (if docs enabled).
+          - `catalog-info.yaml` — Backstage Component entity (registers the repo in the catalog).
+
+          Review and merge; the component will appear in Backstage after merge.
+
+    - id: register
+      name: Register component
+      action: catalog:register
+      input:
+        repoContentsUrl: ${{ steps.openPr.output.remoteUrl }}
+        catalogInfoPath: '/catalog-info.yaml'
+
+  output:
+    links:
+      - title: Golden-path PR
+        url: ${{ steps.openPr.output.remoteUrl }}
+      - title: Open in catalog
+        icon: catalog
+        entityRef: ${{ steps.register.output.entityRef }}
