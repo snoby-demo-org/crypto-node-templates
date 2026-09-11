@@ -1,8 +1,10 @@
 name: Build
 
-# Golden-path CI: compile the project and run its self-test on the self-hosted
-# ARC runner. This is the foundation that makes the GitHub Actions tab in
-# Backstage show real runs.
+# Golden-path CI: run the configure + build commands on the self-hosted ARC
+# runner, plus an optional test command. The commands are captured at scaffold
+# time (configureCommand / buildCommand / testCommand), so this same workflow
+# serves any project language/toolchain. The GitHub Actions tab in Backstage
+# shows real runs from this.
 
 on:
   push:
@@ -18,22 +20,26 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Install build deps
+      - name: Install base build deps
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -y -qq build-essential libssl-dev libgmp-dev \
-            libcurl4-openssl-dev libjansson-dev automake autoconf libtool pkg-config
-
-      - name: Autoreconf / autogen
-        run: |
-          if [ -x ./autogen.sh ]; then ./autogen.sh; else autoreconf -fiv; fi
+          sudo apt-get install -y -qq build-essential
 
       - name: Configure
-        run: ./configure --with-crypto --with-curl
+        env:
+          CONFIGURE_CMD: ${{ values.configureCommand }}
+        run: |
+          if [ -n "$CONFIGURE_CMD" ]; then
+            eval "$CONFIGURE_CMD"
+          fi
 
       - name: Build
-        run: make -j"$(nproc)"
+        run: ${{ values.buildCommand }}
 
-      - name: Self-test
+      - name: Test
+        env:
+          TEST_CMD: ${{ values.testCommand }}
         run: |
-          if [ -x ./cpuminer ]; then ./cpuminer --cputest; fi
+          if [ -n "$TEST_CMD" ]; then
+            eval "$TEST_CMD"
+          fi

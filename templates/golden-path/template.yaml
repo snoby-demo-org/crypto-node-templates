@@ -77,6 +77,21 @@ spec:
           type: string
           description: ARC self-hosted runner scale-set label this repo builds on
           default: k8s-runner
+        configureCommand:
+          title: Configure command
+          type: string
+          description: Command that prepares the build (autotools or similar). Leave blank if none.
+          default: ./autogen.sh && ./configure --with-crypto --with-curl
+        buildCommand:
+          title: Build command
+          type: string
+          description: Command that builds the project
+          default: make -j"$(nproc)"
+        testCommand:
+          title: Test command (optional)
+          type: string
+          description: Command that runs the project's tests. Leave blank if none.
+          default: ''
         checkBuild:
           title: Add build.yml (build + self-test on self-hosted runner)
           type: boolean
@@ -118,6 +133,9 @@ spec:
           runnerLabel: ${{ parameters.runnerLabel }}
           componentId: ${{ parameters.componentId }}
           targetBranch: ${{ parameters.targetBranch }}
+          configureCommand: ${{ parameters.configureCommand }}
+          buildCommand: ${{ parameters.buildCommand }}
+          testCommand: ${{ parameters.testCommand }}
 
     - id: addCi
       name: Add CI workflow
